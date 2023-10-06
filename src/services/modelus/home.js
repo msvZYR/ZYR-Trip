@@ -9,3 +9,11 @@ export function getCategories() {
         url: '/home/categories',
     });
 }
+export function getHouseList(currentPage) {
+    return zyrRequest.get({
+        url: '/home/houselist',
+        params: {
+            page: currentPage,
+        },
+    });
+}
