@@ -1,7 +1,12 @@
 <template>
     <div>
-        <router-view />
-        <tab-bar v-if="!route.meta.hideTabBar" />
+        <router-view v-slot="props">
+            <keep-alive include="home">
+                <component :is="props.Component"></component>
+            </keep-alive>
+        </router-view>
+        <!-- 这里不能使用v-if，组件的销魂和重新加载导致tabbar加载时机不匹配（来不及），应该使用v-show -->
+        <tab-bar v-show="!route.meta.hideTabBar" />
         <!-- <tab-bar></tab-bar> -->
         <loading></loading>
     </div>

@@ -1,5 +1,5 @@
 <template>
-    <div class="home">
+    <div class="home" ref="homeRef">
         <home-nav-bar />
         <div class="banner">
             <img src="@/assets/img/home/banner.webp" alt="" />
@@ -14,8 +14,16 @@
     </div>
 </template>
 
+<!-- <script>
+export default {
+    name: 'home',
+};
+</script> -->
 <script setup>
-import { ref, watch, computed } from 'vue';
+defineOptions({
+    name: 'home',
+});
+import { ref, watch, computed, onActivated } from 'vue';
 import HomeNavBar from './cpns/home-nav-bar.vue';
 import HomeSearchBox from './cpns/home-search-box.vue';
 import HomeCategories from './cpns/home-categories.vue';
@@ -31,9 +39,9 @@ const homeStore = useHomeStore();
 // useScroll(() => {
 //     homeStore.fetchHouseListData();
 // });
-
+const homeRef = ref();
 // 变量方式
-const { isReachBottom, scrollTop } = useScroll();
+const { isReachBottom, scrollTop } = useScroll(homeRef);
 // console.log(isReachBottom, scrollTop);
 watch(isReachBottom, (newValue) => {
     if (newValue) {
@@ -52,12 +60,23 @@ watch(isReachBottom, (newValue) => {
 const isShowSearchBar = computed(() => {
     return scrollTop.value >= 360;
 });
+
+// 跳转回Home时保留原来位置
+
+onActivated(() => {
+    homeRef.value?.scrollTo({
+        top: scrollTop.value,
+    });
+    console.log('&&&&&&&&&&&');
+});
 </script>
 
 <style lang="less" scoped>
 .home {
     // height: calc(100vh - 50px);
-    // overflow-y: auto;
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
     padding-bottom: 50px;
 }
 .banner {

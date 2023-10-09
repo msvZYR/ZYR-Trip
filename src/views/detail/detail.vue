@@ -1,6 +1,12 @@
 <template>
     <div class="detail top-page" ref="detailRef">
-        <tab-control class="tabs" v-if="showTabControl" :titles="titles" @tabItemClick="tabClick"></tab-control>
+        <tab-control
+            class="tabs"
+            v-if="showTabControl"
+            :titles="titles"
+            @tabItemClick="tabClick"
+            ref="tabControllRef"
+        ></tab-control>
         <!-- <h2>detail:{{ $route.params.id }}</h2> -->
         <van-nav-bar title="房屋详情" left-text="旅途" left-arrow @click-left="onClickLeft" />
         <!-- <detail-swipe :swipe-data="mainPart?.topModule?.housePicture?.housePics"></detail-swipe> -->
@@ -39,12 +45,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getDetailInfos } from '@/services';
 import useScroll from '@/hooks/useScroll.js';
 
 import TabControl from '@/components/tab-control/tab-control.vue';
+// import { setCurrentIndex } from '@/components/tab-control/tab-control.vue';
 import DetailSwipe from './cpns/detail_01-swipe.vue';
 import DetailInfos from './cpns/detail_02-infos.vue';
 import DetailFacility from './cpns/detail_03-facility.vue';
@@ -87,6 +94,8 @@ const sectionEls = ref({});
 const titles = computed(() => {
     return Object.keys(sectionEls.value);
 });
+
+// 挂载和卸载时都会执行，由于卸载时给到的value是null，从null中取$el导致报错，解决：非空判断
 const getSectionRef = (value) => {
     // console.log('vvvv:', value.$el.getAttribute('name'));
     if (value) {
@@ -95,19 +104,62 @@ const getSectionRef = (value) => {
     }
     // console.log(value);
 };
-
+let isClick = false;
+let currentDistance = -1;
 const tabClick = (index) => {
     const key = Object.keys(sectionEls.value)[index];
     const el = sectionEls.value[key];
-    let instance = el.offsetTop;
+    let distance = el.offsetTop;
     if (index != 0) {
-        instance -= 44;
+        distance -= 44;
     }
+    isClick = true;
+    currentDistance = distance;
     detailRef.value.scrollTo({
-        top: instance,
+        top: distance,
         behavior: 'smooth',
     });
 };
+
+// 页面滚动，滚动时自动匹配对应的tabControll的index
+const tabControllRef = ref();
+watch(scrollTop, (newValue) => {
+    // 万恶的小数点
+    // console.log('newValue', newValue, 'currentDistance', currentDistance);
+    // console.log('**************newValue === currentDistance:', newValue === currentDistance);
+
+    // let a = String(Math.round(newValue));
+    // let b = String(Math.round(currentDistance));
+    // console.log('a', a, 'b', b, 'a===b', a === b);
+    // if (a === b) {
+    //     isClick = false;
+    //     console.log('----');
+    // }
+    // if (newValue === currentDistance) {
+    //     isClick = false;
+    // }
+    // if (isClick) return;
+    // 获取所有区域的offsetTop
+    const els = Object.values(sectionEls.value);
+    const values = els.map((el) => el.offsetTop);
+    // 根据newValue去匹配想要的索引
+    let index = values.length - 1;
+    for (let i = 0; i < values.length; i++) {
+        if (values[i] > newValue + 44) {
+            index = i - 1;
+            break;
+        }
+    }
+    // console.log(tabControllRef.value.currentIndex);
+    let a = String(Math.round(newValue));
+    let b = String(Math.round(currentDistance));
+    if (!isClick && tabControllRef.value?.currentIndex != index) {
+        tabControllRef.value?.setCurrentIndex(index);
+    } else if (a === b) {
+        isClick = false;
+    }
+    // if (tabControllRef.value?.currentIndex != index) tabControllRef.value?.setCurrentIndex(index);
+});
 </script>
 
 <style lang="less" scoped>

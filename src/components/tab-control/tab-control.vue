@@ -9,7 +9,7 @@
         </template>
     </div>
 </template>
-
+<!-- 
 <script setup name="tab-control">
 import { ref } from 'vue';
 
@@ -28,7 +28,32 @@ const itemClick = (index) => {
     emit('tabItemClick', index);
 };
 </script>
-
+<script> -->
+<script>
+export default {
+    props: {
+        titles: {
+            type: Array,
+            default: () => [],
+        },
+    },
+    data() {
+        return {
+            currentIndex: 0,
+        };
+    },
+    emits: ['tabItemClick'],
+    methods: {
+        itemClick(index) {
+            this.currentIndex = index;
+            this.$emit('tabItemClick', index);
+        },
+        setCurrentIndex(index) {
+            this.currentIndex = index;
+        },
+    },
+};
+</script>
 <style lang="less" scoped>
 .tab-control {
     display: flex;

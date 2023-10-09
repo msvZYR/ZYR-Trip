@@ -51,7 +51,7 @@ export default function useScroll(elRef) {
             scrollHeight.value = el.scrollHeight;
         }
         // console.log('监听到滚动');
-        console.log(clientHeight.value, scrollHeight.value, scrollTop.value);
+        // console.log(clientHeight.value, scrollHeight.value, scrollTop.value);
         if (scrollTop.value + clientHeight.value >= scrollHeight.value - 1) {
             isReachBottom.value = true;
             // console.log(clientHeight.value, scrollHeight.value, scrollTop.value);
